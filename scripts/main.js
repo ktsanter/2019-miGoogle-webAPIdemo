@@ -22,7 +22,7 @@ const app = function () {
     page.body.appendChild(_renderNoticeElement());
 		
     _setNotice('loading course list...');
-    settings.courselist = await _getCourseList();
+    settings.courselist = await _getCourseList(_reportError);
     if (settings.courselist != null) {
       _setNotice('');
       _renderContents();
@@ -107,11 +107,10 @@ const app = function () {
     if (coursekey == NO_COURSE) return;
     
     _setNotice('retrieving info for ' + coursename + '...');
-    settings.coursedata = await _getCourseData(coursekey);
+    settings.coursedata = await _getCourseData(coursekey, _reportError);
     if (settings.coursedata == null) return;
     _setNotice('');
 
-    console.log(settings.coursedata);
     var elemContainer = document.createElement('div');
     elemContainer.classList.add('courseinfo');
     
@@ -143,6 +142,15 @@ const app = function () {
 	//-----------------------------------------------------------------------------
 	// control styling, visibility, and enabling
 	//-----------------------------------------------------------------------------    
+  function _showElement(elem) {
+    if (elem.classList.contains('hide-me')) {
+      elem.classList.remove('hide-me');
+    }
+  }
+
+  function _hideElement(elem) {
+    elem.classList.add('hide-me');
+  }
   
 	//------------------------------------------------------------------
 	// handlers
@@ -167,16 +175,6 @@ const app = function () {
   
   function _reportError(src, err) {
     _setNotice('Error in ' + src + ': ' + err.name + ' "' + err.message + '"');
-  }
-  
-  function _showElement(elem) {
-    if (elem.classList.contains('hide-me')) {
-      elem.classList.remove('hide-me');
-    }
-  }
-
-  function _hideElement(elem) {
-    elem.classList.add('hide-me');
   }
 
 	//---------------------------------------

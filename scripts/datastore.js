@@ -19,7 +19,7 @@ const API_KEY = 'DemoWebAPI_miGoogle2019';
       url += '&' + param + '=' + params[param].replace(/ /g, '%20');
     }
 
-    //console.log('buildApiUrl: url=' + url);
+    console.log('buildApiUrl: url=' + url);
     
     return url;
   }
@@ -27,16 +27,21 @@ const API_KEY = 'DemoWebAPI_miGoogle2019';
 //--------------------------------------------------------------
 // use Google Sheet web API to get list of courses
 //--------------------------------------------------------------  
-async function _getCourseList() {
+async function _getCourseList(funcError) {
   var urlParams = {};
   var url = _buildApiUrl('courselist', urlParams);
   
   try {
     const resp = await fetch(url);
     const json = await resp.json();
+    if (json.status == 'error') {
+      funcError('_getCourseList', {name: 'API failure', message: json.text});
+      console.log('error in _getCourseList: ' + json.text);
+    }
     return json.data;
     
   } catch (error) {
+    funcError('_getCourseList', error);
     console.log('error in _getCourseList: ' + error);
   }
 }
@@ -44,7 +49,7 @@ async function _getCourseList() {
 //--------------------------------------------------------------
 // use Google Sheet web API to get data for the given course
 //--------------------------------------------------------------  
-async function _getCourseData(courseKey) {
+async function _getCourseData(courseKey, funcError) {
   var urlParams = {
     coursekey: courseKey
   };
@@ -53,9 +58,14 @@ async function _getCourseData(courseKey) {
   try {
     const resp = await fetch(url);
     const json = await resp.json();
+    if (json.status == 'error') {
+      funcError('_getCourseData', {name: 'API failure', message: json.text});
+      console.log('error in _getCourseData: ' + json.text);
+    }
     return json.data;
     
   } catch (error) {
+    funcError('_getCourseInfo', error);
     console.log('error in _getCourseData: ' + error);
   }
 }

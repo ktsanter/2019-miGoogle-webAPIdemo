@@ -53,7 +53,7 @@ table, td, th {
 
 th {
   text-align: left;
-  background-color: var(--MV-deep-teal);
+  background-color: var(--MV-light-gray);
   color: var(--MV-white);
 }
 
