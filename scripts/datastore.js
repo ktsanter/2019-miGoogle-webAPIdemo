@@ -4,6 +4,9 @@
 // Google Web API for retrieving demo data 
 //---------------------------------------------------------------
 
+// these both come from the App Script 
+//  - the API base is a result of publishing
+//  - the API key is a constant in the script
 const API_BASE = 'https://script.google.com/a/mivu.org/macros/s/AKfycbwnSjdPvk1V8hEDeMz5zsaDdimmvIcgVFzObNQh/exec';
 const API_KEY = 'DemoWebAPI_miGoogle2019';
 
@@ -19,13 +22,13 @@ const API_KEY = 'DemoWebAPI_miGoogle2019';
       url += '&' + param + '=' + params[param].replace(/ /g, '%20');
     }
 
-    console.log('buildApiUrl: url=' + url);
+    //console.log('buildApiUrl: url=' + url);
     
     return url;
   }
   
 //--------------------------------------------------------------
-// use Google Sheet web API to get list of courses
+// use Google web app API to get list of courses
 //--------------------------------------------------------------  
 async function _getCourseList(funcError) {
   var urlParams = {};
@@ -47,7 +50,7 @@ async function _getCourseList(funcError) {
 }
 
 //--------------------------------------------------------------
-// use Google Sheet web API to get data for the given course
+// use Google web app API to get data for the given course
 //--------------------------------------------------------------  
 async function _getCourseData(courseKey, funcError) {
   var urlParams = {
@@ -71,32 +74,25 @@ async function _getCourseData(courseKey, funcError) {
 }
 
 //--------------------------------------------------------------
-// use GitHub Developer Markdown API
-//--------------------------------------------------------------
-function _convertMarkdownToHTML(data, notice, callback, elemToSet) {
-  if (true) {  // alternative until I figure out rate limiting from GitHub (change to async/await if re-enabled)
-    callback(_alternativeConvertMarkdownToHTML(data), elemToSet);
-  }
-  /*
-	var postData = {
-    "text": data,
-    "mode": "markdown"
-	};
+// use Google web app API to get data for the given instructor
+//--------------------------------------------------------------  
+async function _getInstructorData(instructorKey, funcError) {
+  var urlParams = {
+    instructorkey: instructorKey
+  };
+  var url = _buildApiUrl('instructorinfo', urlParams);
   
-  var url = 'https://api.github.com/markdown/raw';
-	
-	fetch(url, {
-			method: 'POST',
-			headers: { 'Content-Type': 'text/plain' },
-			body: data,
-      mode: 'cors'
-		})
-    .then( (results) => results.text() )
-		.then( (textdata) => callback(textdata, elemToSet) )
-
-		.catch((error) => {
-			notice('Unexpected error using markdown API');
-			console.log(error);
-		})
-    */
+  try {
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if (json.status == 'error') {
+      funcError('_getInstructorData', {name: 'API failure', message: json.text});
+      console.log('error in _getInstructorData: ' + json.text);
+    }
+    return json.data;
+    
+  } catch (error) {
+    funcError('_getInstructorData', error);
+    console.log('error in _getInstructorData: ' + error);
+  }
 }
