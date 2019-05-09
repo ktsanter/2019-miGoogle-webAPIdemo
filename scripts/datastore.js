@@ -31,16 +31,17 @@ const API_KEY = 'DemoWebAPI_miGoogle2019';
 // send GET request to Google web app API
 //   title: name of request (for debug and error messages)
 //   dataset: dataset name passed to API
-//   urlParams: JSON object holding any other query parameters passed to the API
+//   params: JSON object holding any other query parameters passed to the API
 //   funcError: (optional) function for error reporting
 //--------------------------------------------------------------
-async function _webAppGet(title, dataset, urlParams, funcError) {
-  var url = _buildApiUrl(dataset, urlParams);
+async function _webAppGet(title, dataset, params, funcError) {
+  var url = _buildApiUrl(dataset, params);
   
   try {
     const resp = await fetch(url);
     const json = await resp.json();
-    if (json.status == 'error') {
+
+    if (json.status != 'success') {
       if (funcError != null) funcError(title, {name: 'API failure', message: json.text});
       console.log('error in ' + title + ': ' + json.text);
     }
@@ -50,6 +51,34 @@ async function _webAppGet(title, dataset, urlParams, funcError) {
     if (funcError != null) funcError(title, error);
     console.log('error in ' + title + ': ' + error);
   }
+}
+
+//--------------------------------------------------------------
+// send POST request to Google web app API
+//   title: name of request (for debug and error messages)
+//   dataset: dataset name passed to API
+//   params: JSON object holding data passed to the API
+//   funcError: (optional) function for error reporting
+//--------------------------------------------------------------
+async function _webAppPost(title, dataset, postData, funcError) {
+  var url = _buildApiUrl(dataset, {});
+  
+  try {
+    const resp = await fetch(url, {method: 'post', contentType: 'application/x-www-form-urlencoded', body: JSON.stringify(postData)});  
+    const json = await resp.json();
+
+    if (json.status != 'success') {
+      if (funcError != null) funcError(title, {name: 'API failure', message: json.text});
+      console.log('error in ' + title + ': ' + json.text);
+      return null;
+    } else {
+      return json.data;
+    }
+
+  } catch (error) {
+    if (funcError != null) funcError(title, error);
+    console.log('error in ' + title + ': ' + error);
+  }  
 }
 
 //--------------------------------------------------------------
@@ -79,3 +108,13 @@ async function _getAllInstructorData(funcError) {
 async function _getInstructorData(instructorKey, funcError) {
   return await _webAppGet('_getInstructorData', 'instructorinfo', {instructorkey: instructorKey}, funcError);
 }
+
+//--------------------------------------------------------------
+// use Google web app API to post review date for given course
+//--------------------------------------------------------------  
+async function _postReviewDate(courseKey, dateString, funcError) {
+  const dataset = 'reviewdate'
+  var result = await _webAppPost('_putReviewDate', dataset, {coursekey: courseKey, datestring: dateString}, funcError);
+  return result == dataset;
+}
+

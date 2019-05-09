@@ -1,3 +1,4 @@
+"use strict";
 //
 // TODO: add POST
 //
@@ -113,6 +114,8 @@ const app = function () {
     
     elemContainer.appendChild(elemTable);
     
+    elemContainer.appendChild(_renderReviewButton());
+    
     page.courseinfo = elemContainer;
     page.contents.appendChild(elemContainer);
   }
@@ -128,6 +131,27 @@ const app = function () {
     elemRow.appendChild(elemCell);
     
     return elemRow;
+  }
+  
+  function _renderReviewButton() {
+    var elemContainer = document.createElement('div');
+    
+    var elemButton = document.createElement('button');
+    elemButton.innerHTML = 'save review date';
+    elemButton.addEventListener('click', _handleReviewButton, false);
+    elemContainer.appendChild(elemButton);
+    
+    return elemContainer;
+  }
+  
+  async function _saveReviewDate(courseKey) {
+    // note this doesn't address time zone issues
+    var d = new Date();
+    var dstring = '\'' + (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+    
+    _setNotice('saving review date...');
+    var success = await _postReviewDate(courseKey, dstring, _reportError);
+    if (success) _setNotice('');
   }
   
 	//-----------------------------------------------------------------------------
@@ -149,6 +173,10 @@ const app = function () {
   function _handleCourseSelect(e) {
     var selectedOption = e.target.options[e.target.selectedIndex];
     _displayCourseInfo(selectedOption.value, selectedOption.text);
+  }
+  
+  function _handleReviewButton(e) {
+    _saveReviewDate(settings.coursedata.coursekey);
   }
   
 	//---------------------------------------

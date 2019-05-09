@@ -1,3 +1,4 @@
+"use strict";
 //
 // TODO: 
 //
@@ -16,9 +17,19 @@ const app = function () {
     page.contents = document.getElementById('contents');
     
     page.body.appendChild(_renderNoticeElement());
-		    
+
+    _setNotice('initializing...');
+    if (!_initializeSettings()) return;
+    
     _setNotice('loading instructor data...');
-    settings.instructordata = await _getAllInstructorData( _reportError);
+    if (settings.instructorkey == null) {
+      settings.instructordata = await _getAllInstructorData( _reportError);
+      
+    } else {
+      var singleInstructor = await _getInstructorData(settings.instructorkey, _reportError);
+      if (singleInstructor == null) return;
+      settings.instructordata = {instructors: [singleInstructor]};
+    }
     if (settings.instructordata == null) return;
     
     _setNotice('');
@@ -26,6 +37,22 @@ const app = function () {
     _renderContents();
 	}
 		  
+	//-------------------------------------------------------------------------------------
+	// query params:
+	//-------------------------------------------------------------------------------------
+	function _initializeSettings() {
+    var result = false;
+
+    var params = {};
+    var urlParams = new URLSearchParams(window.location.search);
+		params.instructorkey = urlParams.has('instructorkey') ? urlParams.get('instructorkey') : null;
+
+    settings.instructorkey = params.instructorkey
+    result = true;
+    
+    return result;
+  }
+      
 	//-----------------------------------------------------------------------------
 	// page rendering
 	//-----------------------------------------------------------------------------  
