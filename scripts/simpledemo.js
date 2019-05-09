@@ -1,5 +1,5 @@
 //
-// TODO: 
+// TODO: add POST
 //
 
 const app = function () {
@@ -89,15 +89,6 @@ const app = function () {
     return elemContainer;
   }
   
-  function _renderCourseInfo() {
-    var elemContainer = document.createElement('div');
-    elemContainer.classList.add('courseinfo');
-    
-    page.courseinfo = elemContainer;
- 
-    return elemContainer;
-  }
-  
   async function _displayCourseInfo(coursekey, coursename) {
     if (page.courseinfo != null) {
       page.courseinfo.parentNode.removeChild(page.courseinfo);
@@ -107,7 +98,7 @@ const app = function () {
     if (coursekey == NO_COURSE) return;
     
     _setNotice('retrieving info for ' + coursename + '...');
-    settings.coursedata = await _getCourseData(coursekey, _reportError);
+    settings.coursedata = await _getCourseData(coursekey); //, _reportError);
     if (settings.coursedata == null) return;
     _setNotice('');
 

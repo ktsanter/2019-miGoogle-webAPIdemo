@@ -102,8 +102,9 @@ const app = function () {
     elemImage.src = settings.instructordata.photo;
     elemImage.classList.add('instructor-info-photo');
     elemContainer.appendChild(elemImage);
-    
-    elemContainer.appendChild(_renderPairedDiv('instructor-info-section', '', '', settings.instructordata.name, 'instructor-info-name'));
+
+    var fullName = settings.instructordata.first + ' ' + settings.instructordata.last;
+    elemContainer.appendChild(_renderPairedDiv('instructor-info-section', '', '', fullName, 'instructor-info-name'));
     elemContainer.appendChild(_renderPairedDiv('instructor-info-section', 'room: ', 'instructor-info-label', settings.instructordata.room, ''));
     
     var linktext = '<a href=mailto:' + settings.instructordata.email + '>' + settings.instructordata.email + '</a>';
@@ -155,7 +156,6 @@ const app = function () {
   }
   
   function _renderGradingBreakdown() {
-    console.log(settings.coursedata);
     var elemContainer = document.createElement('div');
     elemContainer.classList.add('subsection');
 
