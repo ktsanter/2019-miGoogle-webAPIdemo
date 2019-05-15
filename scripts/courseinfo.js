@@ -7,6 +7,13 @@ const app = function () {
 	const page = {};
   const settings = {};
     
+  const apiInfo = {
+    miGoogle2019: {
+      apibase: 'https://script.google.com/macros/s/AKfycbzrVV2otcnpD2t-II38JVnB7FM7UN5Us9q3964tNHCCiSJOxfU/exec',
+      apikey: 'miGoogle2019_webappAPIDemo'
+    }
+  };
+
   const NO_COURSE = '[none]';
     
 	//---------------------------------------
@@ -22,12 +29,14 @@ const app = function () {
     if (!_initializeSettings()) return;
     
     _setNotice('loading course data...');
-    settings.coursedata = await _getCourseData(settings.coursekey, _reportError);
-    if (settings.coursedata == null) return;
+    var requestResult = await googleSheetWebAPI.webAppGet(apiInfo.miGoogle2019, 'coursedata', {coursekey: settings.coursekey}, _reportError);
+    if (!requestResult.success) return;
+    settings.coursedata = requestResult.data[0];
     
     _setNotice('loading instructor data...');
-    settings.instructordata = await _getInstructorData(settings.instructorkey, _reportError);
-    if (settings.instructordata == null) return;
+    requestResult = await googleSheetWebAPI.webAppGet(apiInfo.miGoogle2019, 'instructorinfo', {instructorkey: settings.instructorkey}, _reportError);
+    if (!requestResult.success) return;
+    settings.instructordata = requestResult.data[0];
     
     _setNotice('');
     page.body.appendChild(_renderTitle());

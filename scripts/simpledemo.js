@@ -10,6 +10,13 @@ const app = function () {
     courselist: null
   };
   
+  const apiInfo = {
+    miGoogle2019: {
+      apibase: 'https://script.google.com/macros/s/AKfycbzrVV2otcnpD2t-II38JVnB7FM7UN5Us9q3964tNHCCiSJOxfU/exec',
+      apikey: 'miGoogle2019_webappAPIDemo'
+    }
+  };
+  
   const NO_COURSE = '[none]';
     
 	//---------------------------------------
@@ -23,8 +30,9 @@ const app = function () {
     page.body.appendChild(_renderNoticeElement());
 		
     _setNotice('loading course list...');
-    settings.courselist = await _getCourseList(_reportError);
-    if (settings.courselist != null) {
+    var requestResult  = await googleSheetWebAPI.webAppGet(apiInfo.miGoogle2019, 'courselist', {}, _reportError);
+    if (requestResult.success) {
+      settings.courselist = requestResult.data;
       _setNotice('');
       _renderContents();
     }
@@ -71,7 +79,7 @@ const app = function () {
     elemContainer.appendChild(elemLabel);
     
     var elemSelect = document.createElement('select');
-    var courses = settings.courselist.courses;
+    var courses = settings.courselist;
     
     var elemOpt = document.createElement('option');
     elemOpt.value = NO_COURSE;
@@ -99,8 +107,10 @@ const app = function () {
     if (coursekey == NO_COURSE) return;
     
     _setNotice('retrieving info for ' + coursename + '...');
-    settings.coursedata = await _getCourseData(coursekey); //, _reportError);
-    if (settings.coursedata == null) return;
+    
+    var requestResult = await googleSheetWebAPI.webAppGet(apiInfo.miGoogle2019, 'coursedata', {coursekey: coursekey}, _reportError);
+    if (!requestResult.success) return;
+    settings.coursedata = requestResult.data[0];
     _setNotice('');
 
     var elemContainer = document.createElement('div');
@@ -147,11 +157,12 @@ const app = function () {
   async function _saveReviewDate(courseKey) {
     // note this doesn't address time zone issues
     var d = new Date();
-    var dstring = '\'' + (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+    var dateString = '\'' + (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
     
     _setNotice('saving review date...');
-    var success = await _postReviewDate(courseKey, dstring, _reportError);
-    if (success) _setNotice('');
+    var requestResult = await googleSheetWebAPI.webAppPost(apiInfo.miGoogle2019, 'reviewdate', {criteria: {coursekey: courseKey}, newdata:{reviewdate: dateString}}, _reportError);
+    console.log(requestResult);
+    if (requestResult.success) _setNotice('');
   }
   
 	//-----------------------------------------------------------------------------

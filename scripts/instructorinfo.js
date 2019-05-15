@@ -6,7 +6,14 @@
 const app = function () {
 	const page = {};
   const settings = {};
-    
+
+  const apiInfo = {
+    miGoogle2019: {
+      apibase: 'https://script.google.com/macros/s/AKfycbzrVV2otcnpD2t-II38JVnB7FM7UN5Us9q3964tNHCCiSJOxfU/exec',
+      apikey: 'miGoogle2019_webappAPIDemo'
+    }
+  };
+  
   const NO_COURSE = '[none]';
     
 	//---------------------------------------
@@ -23,14 +30,15 @@ const app = function () {
     
     _setNotice('loading instructor data...');
     if (settings.instructorkey == null) {
-      settings.instructordata = await _getAllInstructorData( _reportError);
+      var requestResult = await googleSheetWebAPI.webAppGet(apiInfo.miGoogle2019, 'allinstructorinfo', {}, _reportError);
+      if (!requestResult.success) return;
+      settings.instructordata = requestResult.data;
       
     } else {
-      var singleInstructor = await _getInstructorData(settings.instructorkey, _reportError);
-      if (singleInstructor == null) return;
-      settings.instructordata = {instructors: [singleInstructor]};
+      var requestResult = await googleSheetWebAPI.webAppGet(apiInfo.miGoogle2019, 'instructorinfo', {instructorkey: settings.instructorkey}, _reportError);
+      if (!requestResult.success) return;
+      settings.instructordata = requestResult.data;
     }
-    if (settings.instructordata == null) return;
     
     _setNotice('');
     page.body.appendChild(_renderTitle());
@@ -79,7 +87,7 @@ const app = function () {
     var elemContainer = document.createElement('div');
     elemContainer.classList.add('courseinfo');
 
-    var instructors = settings.instructordata.instructors;
+    var instructors = settings.instructordata;
     for (var i = 0; i < instructors.length; i++) {
       elemContainer.appendChild(_renderInstructorInfo(instructors[i]));
     }
